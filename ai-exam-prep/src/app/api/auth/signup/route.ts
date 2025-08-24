@@ -1,44 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import sqlite3 from 'sqlite3';
-import { open } from 'sqlite';
-import path from 'path';
+import { getDb, initDb } from '../../../../lib/database';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
-// Initialize database
-async function getDb() {
-  const dbPath = path.join(process.cwd(), 'users.db');
-  return open({
-    filename: dbPath,
-    driver: sqlite3.Database
-  });
-}
-
-// Create users table if it doesn't exist
-async function initDb() {
-  const db = await getDb();
-  await db.exec(`
-    CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      firstName TEXT NOT NULL,
-      lastName TEXT NOT NULL,
-      email TEXT UNIQUE NOT NULL,
-      password TEXT NOT NULL,
-      school TEXT NOT NULL,
-      year TEXT NOT NULL,
-      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-  await db.close();
-}
-
 export async function POST(request: NextRequest) {
   try {
-    // Initialize database
-    await initDb();
-
     const { firstName, lastName, email, password, school, year } = await request.json();
 
     // Validate required fields
@@ -66,32 +34,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const db = await getDb();
+    const client = await getDb();
+    let newUser;
     
-    // Check if user already exists
-    const existingUser = await db.get('SELECT id FROM users WHERE email = ?', [email]);
-    
-    if (existingUser) {
-      await db.close();
-      return NextResponse.json(
-        { message: 'User with this email already exists' },
-        { status: 409 }
+    try {
+      // Check if user already exists
+      const existingUserResult = await client.query('SELECT id FROM users WHERE email = $1', [email]);
+      
+      if (existingUserResult.rows.length > 0) {
+        return NextResponse.json(
+          { message: 'User with this email already exists' },
+          { status: 409 }
+        );
+      }
+
+      // Hash password
+      const saltRounds = 12;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+      // Insert new user
+      const insertResult = await client.query(
+        'INSERT INTO users (firstName, lastName, email, password, school, year) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+        [firstName, lastName, email, hashedPassword, school, year]
       );
+
+      newUser = insertResult.rows[0];
+    } finally {
+      client.release();
     }
-
-    // Hash password
-    const saltRounds = 12;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-    // Insert new user
-    const result = await db.run(
-      'INSERT INTO users (firstName, lastName, email, password, school, year) VALUES (?, ?, ?, ?, ?, ?)',
-      [firstName, lastName, email, hashedPassword, school, year]
-    );
-
-    // Get the created user
-    const newUser = await db.get('SELECT * FROM users WHERE id = ?', [result.lastID]);
-    await db.close();
 
     // Generate JWT token
     const token = jwt.sign(

@@ -26,7 +26,7 @@ export default function LandingPage() {
                 <Link href="/auth/login" className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
                   Sign In
                 </Link>
-                <Link href="/auth/login" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                <Link href="/auth/signup" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium">
                   Get Started
                 </Link>
               </div>
@@ -55,7 +55,7 @@ export default function LandingPage() {
               <Link href="/auth/login" className="text-gray-700 hover:text-indigo-600 block px-3 py-2 rounded-md text-base font-medium">
                 Sign In
               </Link>
-              <Link href="/auth/login" className="bg-indigo-600 hover:bg-indigo-700 text-white block px-3 py-2 rounded-md text-base font-medium">
+              <Link href="/auth/signup" className="bg-indigo-600 hover:bg-indigo-700 text-white block px-3 py-2 rounded-md text-base font-medium">
                 Get Started
               </Link>
             </div>
@@ -79,7 +79,7 @@ export default function LandingPage() {
                 <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
                   <div className="rounded-md shadow">
                     <Link
-                      href="/auth/login"
+                      href="/auth/signup"
                       className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10"
                     >
                       Try Now
@@ -178,12 +178,12 @@ export default function LandingPage() {
           </p>
           <div className="mt-8 flex justify-center">
             <div className="inline-flex rounded-md shadow">
-              <Link
-                href="/auth/login"
-                className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-indigo-50"
-              >
-                Try for FREE
-              </Link>
+                             <Link
+                 href="/auth/signup"
+                 className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-indigo-50"
+               >
+                 Try for FREE
+               </Link>
             </div>
             <div className="ml-3 inline-flex">
               <Link

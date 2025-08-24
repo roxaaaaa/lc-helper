@@ -1,44 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import sqlite3 from 'sqlite3';
-import { open } from 'sqlite';
-import path from 'path';
+import { getDb, initDb } from '../../../../lib/database';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
-// Initialize database
-async function getDb() {
-  const dbPath = path.join(process.cwd(), 'users.db');
-  return open({
-    filename: dbPath,
-    driver: sqlite3.Database
-  });
-}
-
-// Create users table if it doesn't exist
-async function initDb() {
-  const db = await getDb();
-  await db.exec(`
-    CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      firstName TEXT NOT NULL,
-      lastName TEXT NOT NULL,
-      email TEXT UNIQUE NOT NULL,
-      password TEXT NOT NULL,
-      school TEXT NOT NULL,
-      year TEXT NOT NULL,
-      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-  await db.close();
-}
-
 export async function POST(request: NextRequest) {
   try {
-    // Initialize database
-    await initDb();
-
     const { email, password } = await request.json();
 
     if (!email || !password) {
@@ -48,11 +16,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const db = await getDb();
+    const client = await getDb();
+    let user;
     
-    // Find user by email
-    const user = await db.get('SELECT * FROM users WHERE email = ?', [email]);
-    await db.close();
+    try {
+      // Find user by email
+      const result = await client.query('SELECT * FROM users WHERE email = $1', [email]);
+      user = result.rows[0];
+    } finally {
+      client.release();
+    }
 
     if (!user) {
       return NextResponse.json(

@@ -1,5 +1,7 @@
 "use client";
 import { useState } from "react";
+import { useAuth } from "../../contexts/AuthContext";
+import { useRouter } from "next/navigation";
 
 const SUBJECTS = [
   { label: "Agriculture", value: "agriculture" },
@@ -11,12 +13,26 @@ const LEVELS = [
 ];
 
 export default function MainPage() {
+  const { logout } = useAuth();
+  const router = useRouter();
   const [subject, setSubject] = useState(SUBJECTS[0].value);
   const [level, setLevel] = useState(LEVELS[0].value);
   const [topic, setTopic] = useState("");
   const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState<string[] | null>(null);
   const [dark, setDark] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      logout();
+      router.push('/landing');
+    } catch (error) {
+      console.error('Logout error:', error);
+      logout();
+      router.push('/landing');
+    }
+  };
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,17 +96,25 @@ export default function MainPage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background text-foreground transition-colors duration-300 px-4">
-      <button
-        aria-label="Toggle dark mode"
-        className="absolute top-4 right-4 p-2 rounded-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-black shadow hover:scale-105 transition"
-        onClick={toggleDark}
-      >
-        {dark ? (
-          <span role="img" aria-label="Light mode">🌞</span>
-        ) : (
-          <span role="img" aria-label="Dark mode">🌙</span>
-        )}
-      </button>
+      <div className="absolute top-4 right-4 flex gap-2">
+        <button
+          onClick={handleLogout}
+          className="px-4 py-2 rounded bg-red-600 text-white font-semibold hover:bg-red-700 transition"
+        >
+          Logout
+        </button>
+        <button
+          aria-label="Toggle dark mode"
+          className="p-2 rounded-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-black shadow hover:scale-105 transition"
+          onClick={toggleDark}
+        >
+          {dark ? (
+            <span role="img" aria-label="Light mode">🌞</span>
+          ) : (
+            <span role="img" aria-label="Dark mode">🌙</span>
+          )}
+        </button>
+      </div>
       <div className="max-w-lg w-full flex flex-col gap-8 items-center">
         <header className="text-center mt-8 mb-4">
           <h1 className="text-4xl font-bold mb-2 tracking-tight">AI Exam Prep</h1>

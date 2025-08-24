@@ -20,7 +20,7 @@ export default function PricingPage() {
                 <Link href="/pricing" className="text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
                   Pricing
                 </Link>
-                <Link href="/main" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                <Link href="/auth/signup" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium">
                   Get Started
                 </Link>
               </div>
@@ -56,7 +56,7 @@ export default function PricingPage() {
               <li>✅ No credit card required</li>
               <li>✅ Try questions, dashboard & feedback</li>
             </ul>
-            <Link href="/main" className="mt-auto bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded text-center">Start Free Trial</Link>
+            <Link href="/auth/signup" className="mt-auto bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded text-center">Start Free Trial</Link>
           </div>
           {/* Pro Student Plan */}
           <div className="bg-white rounded-lg shadow p-6 flex flex-col border-2 border-indigo-500 relative">
@@ -71,7 +71,7 @@ export default function PricingPage() {
               <li>✅ New features & updates included</li>
               <li>✅ Cancel anytime</li>
             </ul>
-            <Link href="/main" className="mt-auto bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded text-center">Go Pro</Link>
+            <Link href="/auth/signup" className="mt-auto bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded text-center">Go Pro</Link>
           </div>
           {/* Exam Booster Plan */}
           <div className="bg-white rounded-lg shadow p-6 flex flex-col border border-indigo-100">
@@ -82,7 +82,7 @@ export default function PricingPage() {
               <li>✅ Includes everything in Pro</li>
               <li>✅ One-time payment, no auto-renewal</li>
             </ul>
-            <Link href="/main" className="mt-auto bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded text-center">Boost My Prep</Link>
+            <Link href="/auth/signup" className="mt-auto bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded text-center">Boost My Prep</Link>
           </div>
         </div>
       </div>
