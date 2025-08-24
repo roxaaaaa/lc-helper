@@ -45,7 +45,7 @@ export default function PricingPage() {
 
       {/* Student Plans */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-        <h2 className="text-2xl font-bold text-indigo-700 mb-6">🧑‍🎓 For Students</h2>
+        <h2 className="text-2xl font-bold text-indigo-700 mb-6">For Students</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Starter Plan */}
           <div className="bg-white rounded-lg shadow p-6 flex flex-col border border-indigo-100">
@@ -85,57 +85,6 @@ export default function PricingPage() {
             <Link href="/main" className="mt-auto bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded text-center">Boost My Prep</Link>
           </div>
         </div>
-      </div>
-
-      {/* Teacher & School Plans */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-        <h2 className="text-2xl font-bold text-indigo-700 mb-6">👩‍🏫 For Teachers & Schools</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Teacher Toolkit */}
-          <div className="bg-white rounded-lg shadow p-6 flex flex-col border border-indigo-100">
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Teacher Toolkit</h3>
-            <p className="text-3xl font-bold text-indigo-600 mb-2">€14.99 <span className="text-base font-normal text-gray-500">/month</span></p>
-            <ul className="mb-4 space-y-2 text-gray-700">
-              <li>✅ Access to all subjects</li>
-              <li>✅ Class dashboard: monitor student progress</li>
-              <li>✅ Exportable performance reports</li>
-              <li>✅ Create and assign question sets</li>
-              <li>✅ Ideal for tutors, grinds, and class groups</li>
-            </ul>
-            <Link href="/main" className="mt-auto bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded text-center">Get Teacher Toolkit</Link>
-          </div>
-          {/* School License */}
-          <div className="bg-white rounded-lg shadow p-6 flex flex-col border border-indigo-100">
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">School License</h3>
-            <p className="text-2xl font-bold text-indigo-600 mb-2">Custom Pricing</p>
-            <ul className="mb-4 space-y-2 text-gray-700">
-              <li>✅ For full-classroom or multi-user access</li>
-              <li>✅ Volume discounts available</li>
-              <li>✅ Email us at <a href="mailto:your-email@example.com" className="underline text-indigo-600">your-email@example.com</a> for a quote</li>
-            </ul>
-            <a href="mailto:your-email@example.com" className="mt-auto bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded text-center">Contact Us</a>
-          </div>
-        </div>
-      </div>
-
-      {/* Extra Offers */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-        <h2 className="text-xl font-bold text-indigo-700 mb-4">🎁 Extra Offers to Boost Sign-ups</h2>
-        <ul className="space-y-2 text-gray-700">
-          <li><span className="font-semibold">Early Bird Bonus:</span> First 100 paid users get 1 extra month free</li>
-          <li><span className="font-semibold">Refer a Friend:</span> Get €5 credit or 1 free month when a friend joins</li>
-          <li><span className="font-semibold">Group Discount:</span> 10% off for groups of 5+ (perfect for study groups)</li>
-        </ul>
-      </div>
-
-      {/* Marketing Tips */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <h2 className="text-xl font-bold text-indigo-700 mb-4">💡 Tips to Market the Pricing</h2>
-        <ul className="space-y-2 text-gray-700">
-          <li><span className="font-semibold">Use "Per Day" Framing:</span> <span className="italic">"That's just 33 cents a day for top exam prep!"</span></li>
-          <li><span className="font-semibold">Highlight Flexibility:</span> <span className="italic">"No contracts. Cancel anytime. No hidden fees."</span></li>
-          <li><span className="font-semibold">Stress Value Over Price:</span> <span className="italic">"Get the marks you deserve – for less than a takeaway."</span></li>
-        </ul>
       </div>
 
       {/* Footer */}

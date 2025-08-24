@@ -23,8 +23,11 @@ export default function LandingPage() {
                 <Link href="/pricing" className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
                   Pricing
                 </Link>
-                <Link href="/main" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium">
-                  Try it now for free
+                <Link href="/auth/login" className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
+                  Sign In
+                </Link>
+                <Link href="/auth/login" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                  Get Started
                 </Link>
               </div>
             </div>
@@ -49,7 +52,10 @@ export default function LandingPage() {
               <Link href="/pricing" className="text-gray-700 hover:text-indigo-600 block px-3 py-2 rounded-md text-base font-medium">
                 Pricing
               </Link>
-              <Link href="/main" className="bg-indigo-600 hover:bg-indigo-700 text-white block px-3 py-2 rounded-md text-base font-medium">
+              <Link href="/auth/login" className="text-gray-700 hover:text-indigo-600 block px-3 py-2 rounded-md text-base font-medium">
+                Sign In
+              </Link>
+              <Link href="/auth/login" className="bg-indigo-600 hover:bg-indigo-700 text-white block px-3 py-2 rounded-md text-base font-medium">
                 Get Started
               </Link>
             </div>
@@ -73,10 +79,10 @@ export default function LandingPage() {
                 <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
                   <div className="rounded-md shadow">
                     <Link
-                      href="/main"
+                      href="/auth/login"
                       className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10"
                     >
-                      Start Studying
+                      Try Now
                     </Link>
                   </div>
                   <div className="mt-3 sm:mt-0 sm:ml-3">
@@ -151,7 +157,7 @@ export default function LandingPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                   </svg>
                 </div>
-                <p className="ml-16 text-lg leading-6 font-medium text-gray-900"> 7-Day Free Trial</p>
+                <p className="ml-16 text-lg leading-6 font-medium text-gray-900"> 7-Day FREE Trial</p>
                 <p className="mt-2 ml-16 text-base text-gray-500">
                   No credit card needed. Just sign up and start leveling up your grades today.
                 </p>
@@ -165,9 +171,7 @@ export default function LandingPage() {
       <div className="bg-indigo-700">
         <div className="max-w-2xl mx-auto text-center py-16 px-4 sm:py-20 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
-            <span className="block">Try It FREE for 7 Days</span>
-            <span className="block">🔥 Don’t Just Study. Study Smart with LC HELPER.</span>
-            <span className="block">Join hundreds of Irish students already getting exam-ready the AI-powered way.</span>
+            <span className="block">Join hundreds of Irish students already getting exam-ready the AI-powered way</span>
           </h2>
           <p className="mt-4 text-lg leading-6 text-indigo-200">
             Feel confident walking into that exam hall. Limited spots for the free trial – reserve yours now!.
@@ -175,10 +179,10 @@ export default function LandingPage() {
           <div className="mt-8 flex justify-center">
             <div className="inline-flex rounded-md shadow">
               <Link
-                href="/main"
+                href="/auth/login"
                 className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-indigo-50"
               >
-                Get Started
+                Try for FREE
               </Link>
             </div>
             <div className="ml-3 inline-flex">
