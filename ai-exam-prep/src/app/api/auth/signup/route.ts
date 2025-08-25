@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import { JWTService } from '../../../../lib/jwt';
 import { getDb, initDb } from '../../../../lib/database';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
 export async function POST(request: NextRequest) {
   try {
@@ -64,16 +62,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate JWT token
-    const token = jwt.sign(
-      { 
-        userId: newUser.id, 
-        email: newUser.email,
-        firstName: newUser.firstName,
-        lastName: newUser.lastName
-      },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    const token = JWTService.generateToken({
+      userId: newUser.id,
+      email: newUser.email,
+      firstName: newUser.firstName,
+      lastName: newUser.lastName
+    });
 
     // Return user data (without password) and token
     const { password: _, ...userWithoutPassword } = newUser;

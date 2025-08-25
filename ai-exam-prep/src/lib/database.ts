@@ -56,6 +56,7 @@ export async function getDb(): Promise<PoolClient> {
 export async function initDb() {
   const client = await getDb();
   try {
+    // Create users table with subscription fields
     await client.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -65,9 +66,52 @@ export async function initDb() {
         password TEXT NOT NULL,
         school TEXT NOT NULL,
         year TEXT NOT NULL,
+        trialStartDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        trialEndDate TIMESTAMP DEFAULT (CURRENT_TIMESTAMP + INTERVAL '30 days'),
+        subscriptionStatus TEXT DEFAULT 'trial',
+        subscriptionType TEXT DEFAULT NULL,
+        subscriptionEndDate TIMESTAMP DEFAULT NULL,
         createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
+
+    // Create subscription plans table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS subscription_plans (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        price DECIMAL(10,2) NOT NULL,
+        duration_months INTEGER NOT NULL,
+        features TEXT[] NOT NULL,
+        isActive BOOLEAN DEFAULT true,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Create payment history table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS payment_history (
+        id SERIAL PRIMARY KEY,
+        userId INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        planId INTEGER REFERENCES subscription_plans(id),
+        amount DECIMAL(10,2) NOT NULL,
+        currency TEXT DEFAULT 'USD',
+        status TEXT NOT NULL,
+        paymentMethod TEXT,
+        transactionId TEXT,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Insert default subscription plans if they don't exist
+    await client.query(`
+      INSERT INTO subscription_plans (name, price, duration_months, features) 
+      VALUES 
+        ('Monthly', 9.99, 1, ARRAY['Unlimited practice questions', 'Detailed explanations', 'Progress tracking', 'Mock exams']),
+        ('Yearly', 99.99, 12, ARRAY['Unlimited practice questions', 'Detailed explanations', 'Progress tracking', 'Mock exams', 'Priority support', '2 months free'])
+      ON CONFLICT DO NOTHING
+    `);
+
   } finally {
     client.release();
   }

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { JWTService } from '../lib/jwt';
 
 interface User {
   id: number;
@@ -17,7 +18,9 @@ interface AuthContextType {
   token: string | null;
   login: (token: string, user: User) => void;
   logout: () => void;
+  refreshToken: () => Promise<boolean>;
   isLoading: boolean;
+  isRefreshing: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -26,6 +29,67 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Function to refresh token
+  const refreshToken = async (): Promise<boolean> => {
+    if (!token) return false;
+    
+    setIsRefreshing(true);
+    try {
+      const response = await fetch('/api/auth/refresh', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setToken(data.token);
+        setUser(data.user);
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        return true;
+      } else {
+        // Token refresh failed, logout user
+        logout();
+        return false;
+      }
+    } catch (error) {
+      console.error('Token refresh error:', error);
+      logout();
+      return false;
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  // Check token validity and refresh if needed
+  const checkAndRefreshToken = async (storedToken: string, storedUser: string) => {
+    try {
+      // Check if token is expired or close to expiring
+      if (JWTService.isTokenExpired(storedToken) || JWTService.shouldRefreshToken(storedToken)) {
+        // Try to refresh the token
+        const refreshSuccess = await refreshToken();
+        if (!refreshSuccess) {
+          // If refresh fails, clear stored data
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          return;
+        }
+      } else {
+        // Token is still valid, set it
+        const userData = JSON.parse(storedUser);
+        setToken(storedToken);
+        setUser(userData);
+      }
+    } catch (error) {
+      console.error('Error checking token validity:', error);
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    }
+  };
 
   useEffect(() => {
     // Check for existing token and user data on app load
@@ -33,15 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const storedUser = localStorage.getItem('user');
 
     if (storedToken && storedUser) {
-      try {
-        const userData = JSON.parse(storedUser);
-        setToken(storedToken);
-        setUser(userData);
-      } catch (error) {
-        console.error('Error parsing stored user data:', error);
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-      }
+      checkAndRefreshToken(storedToken, storedUser);
     }
     setIsLoading(false);
   }, []);
@@ -65,7 +121,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     token,
     login,
     logout,
+    refreshToken,
     isLoading,
+    isRefreshing,
   };
 
   return (

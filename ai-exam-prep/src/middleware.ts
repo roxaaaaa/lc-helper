@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { jwtVerify } from 'jose';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+import { JWTService } from './lib/jwt';
 
 // Routes that require authentication
-const protectedRoutes = ['/main', '/dashboard', '/profile'];
+const protectedRoutes = ['/main', '/dashboard', '/profile', '/payment'];
 // Routes that should redirect to main if already authenticated
 const authRoutes = ['/auth/login', '/auth/signup'];
 
@@ -23,10 +21,7 @@ export async function middleware(request: NextRequest) {
   try {
     if (token) {
       // Verify JWT token
-      const { payload } = await jwtVerify(
-        token,
-        new TextEncoder().encode(JWT_SECRET)
-      );
+      const payload = await JWTService.verifyToken(token);
       
       // If user is authenticated and trying to access auth routes, redirect to main
       if (isAuthRoute) {
