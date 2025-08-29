@@ -5,7 +5,12 @@ import { getDb, initDb } from '../../../../lib/database';
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('Login attempt started');
+    // Initialize database if needed
+    await initDb();
+    
     const { email, password } = await request.json();
+    console.log('Login attempt for email:', email);
 
     if (!email || !password) {
       return NextResponse.json(
@@ -18,9 +23,14 @@ export async function POST(request: NextRequest) {
     let user;
     
     try {
+      console.log('Querying database for user...');
       // Find user by email
-      const result = await client.query('SELECT * FROM users WHERE email = $1', [email]);
+      const result = await client.query(
+        'SELECT id, email, password, firstName, lastName, school, year, createdAt FROM users WHERE email = $1', 
+        [email]
+      );
       user = result.rows[0];
+      console.log('User found:', user ? 'Yes' : 'No');
     } finally {
       client.release();
     }
@@ -43,12 +53,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate JWT token
-    const token = JWTService.generateToken({
+          const token = await JWTService.generateToken({
       userId: user.id,
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName
     });
+    console.log('Generated token:', token.substring(0, 20) + '...');
 
     // Return user data (without password) and token
     const { password: _, ...userWithoutPassword } = user;
@@ -67,14 +78,15 @@ export async function POST(request: NextRequest) {
       path: '/',
       maxAge: 60 * 60 * 24 * 7, // 7 days
     });
+    console.log('Token set in cookie');
 
     return response;
 
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json(
-      { message: 'Internal server error' },
+      { message: `Internal server error: ${error instanceof Error ? error.message : 'Unknown error'}` },
       { status: 500 }
     );
   }
-} 
+}

@@ -1,279 +1,157 @@
-# JWT Token Implementation Guide
+# JWT Implementation in AI Exam Prep App
 
-## Overview
+## Quick Summary
 
-This project implements a robust JWT (JSON Web Token) authentication system with automatic token refresh, secure storage, and comprehensive error handling.
+This app uses a **unified JWT authentication system** that automatically adapts to different runtime environments (Edge Runtime and Node.js) while maintaining a single, consistent API. The system provides secure token-based authentication with automatic refresh capabilities.
 
-## What are JWT Tokens?
+## What is JWT?
 
-JWT tokens are compact, URL-safe tokens that contain claims (information) about a user. They consist of three parts:
-1. **Header** - Contains token type and signing algorithm
-2. **Payload** - Contains the actual data (claims)
-3. **Signature** - Verifies the token hasn't been tampered with
+**JWT (JSON Web Token)** is a secure way to transmit information between parties as a JSON object. Think of it as a digital passport that:
+- Contains user information (ID, email, name)
+- Is cryptographically signed to prevent tampering
+- Has an expiration time for security
+- Can be verified without storing session data on the server
 
-## Why Use JWT Tokens?
+## How It's Implemented in This App
 
-### 1. **Stateless Authentication**
-- No need to store session data on the server
-- Each request contains all necessary authentication information
-- Scales better across multiple servers
+### 🏗️ **Unified Architecture**
 
-### 2. **Security Benefits**
-- Tamper-proof (signature verification)
-- Can include expiration times
-- Can be revoked by changing the secret key
-
-### 3. **Cross-Domain Compatibility**
-- Work well with microservices
-- Can be used across different domains
-- Ideal for API authentication
-
-## Implementation Details
-
-### 1. JWT Service (`src/lib/jwt.ts`)
-
-Centralized JWT operations with the following features:
+The app uses a **single JWT service** (`src/lib/jwt.ts`) that automatically detects the runtime environment:
 
 ```typescript
-// Generate a new token
-const token = JWTService.generateToken({
+// Automatically uses the right library based on environment
+const token = await JWTService.generateToken({
   userId: user.id,
   email: user.email,
   firstName: user.firstName,
   lastName: user.lastName
 });
-
-// Verify a token
-const payload = await JWTService.verifyToken(token);
-
-// Check if token is expired
-const isExpired = JWTService.isTokenExpired(token);
-
-// Check if token should be refreshed
-const shouldRefresh = JWTService.shouldRefreshToken(token);
 ```
 
-### 2. Authentication Context (`src/contexts/AuthContext.tsx`)
+**Edge Runtime** → Uses `jose` library (async operations)
+**Node.js Runtime** → Uses `jsonwebtoken` library (sync operations)
 
-Enhanced React context with automatic token refresh:
+### 🔐 **Security Features**
+
+1. **Secure Secret Management**
+   ```typescript
+   // Throws error in production if secret not set
+   const getJwtSecret = (): string => {
+     const secret = process.env.JWT_SECRET;
+     if (!secret && process.env.NODE_ENV === 'production') {
+       throw new Error('JWT_SECRET is required in production');
+     }
+     return secret || 'default-secret-for-development';
+   };
+   ```
+
+2. **Payload Standardization**
+   ```typescript
+   // Ensures consistent data types across environments
+   const standardizedPayload = {
+     userId: Number(payload.userId),
+     email: String(payload.email),
+     firstName: String(payload.firstName),
+     lastName: String(payload.lastName)
+   };
+   ```
+
+3. **Type-Safe Validation**
+   ```typescript
+   // Validates payload structure before processing
+   function isJWTPayload(payload: any): payload is JWTPayload {
+     return (
+       payload &&
+       (typeof payload.userId === 'number' || typeof payload.userId === 'string') &&
+       typeof payload.email === 'string' &&
+       typeof payload.firstName === 'string' &&
+       typeof payload.lastName === 'string'
+     );
+   }
+   ```
+
+### 🛡️ **Authentication Flow**
+
+1. **Login** (`/api/auth/login`)
+   - User provides email/password
+   - Server validates credentials
+   - Generates JWT token (7-day expiration)
+   - Sets secure httpOnly cookie
+   - Returns user data and token
+
+2. **Route Protection** (`middleware.ts`)
+   - Checks for valid token on protected routes
+   - Redirects to login if token invalid/missing
+   - Allows access to authenticated users
+
+3. **Token Refresh** (`/api/auth/refresh`)
+   - Automatically refreshes tokens before expiration
+   - Updates both cookie and client storage
+   - Handles failed refresh gracefully
+
+### 🔄 **Automatic Token Management**
+
+The app includes smart token management utilities:
 
 ```typescript
-const { user, token, login, logout, refreshToken, isLoading, isRefreshing } = useAuth();
+// Client-side utilities (auth-utils.ts)
+const response = await apiClient.get('/protected-endpoint');
+// Automatically handles token refresh if needed
 
-// Automatic token refresh on app load
-// Manual token refresh
+// Manual refresh
 const success = await refreshToken();
 ```
 
-### 3. API Routes
+### 📍 **Where JWT is Used**
 
-#### Login (`/api/auth/login`)
-- Validates user credentials
-- Generates JWT token with 7-day expiration
-- Sets httpOnly cookie for security
-- Returns user data and token
+| Location | Purpose | Runtime |
+|----------|---------|---------|
+| `middleware.ts` | Route protection | Edge Runtime |
+| `/api/auth/login` | Generate tokens | Edge Runtime |
+| `/api/auth/refresh` | Refresh tokens | Edge Runtime |
+| `/api/user/*` | Verify tokens | Node.js |
+| `auth-utils.ts` | Client utilities | Node.js |
 
-#### Refresh (`/api/auth/refresh`)
-- Verifies current token
-- Generates new token with fresh expiration
-- Updates both cookie and response data
+### 🚀 **Key Benefits**
 
-#### Logout (`/api/auth/logout`)
-- Clears authentication cookies
-- Removes stored tokens
+1. **Single Codebase**: One service works everywhere
+2. **Automatic Adaptation**: Chooses optimal library per environment
+3. **Type Safety**: Full TypeScript support with validation
+4. **Security First**: Secure defaults and production requirements
+5. **Developer Friendly**: Simple API with complex logic hidden
 
-### 4. Middleware Protection (`src/middleware.ts`)
+### 🔧 **Environment Setup**
 
-Route protection with automatic token verification:
+```env
+# Required in production
+JWT_SECRET=your-super-secure-secret-key
 
-```typescript
-// Protected routes
-const protectedRoutes = ['/main', '/dashboard', '/profile'];
-
-// Auth routes (redirect if already authenticated)
-const authRoutes = ['/auth/login', '/auth/signup'];
+# Optional - for debugging
+NODE_ENV=development
 ```
 
-### 5. Authenticated API Client (`src/lib/auth-utils.ts`)
+### 📝 **Usage Examples**
 
-Utility for making authenticated requests with automatic token refresh:
-
+**Generate Token:**
 ```typescript
-import { apiClient } from '../lib/auth-utils';
-
-// Make authenticated requests
-const response = await apiClient.get('/protected-endpoint');
-const data = await apiClient.post('/api/data', { key: 'value' });
-
-// Or use the lower-level function
-const response = await authenticatedFetch('/api/protected', {
-  method: 'POST',
-  body: JSON.stringify(data)
+const token = await JWTService.generateToken({
+  userId: 123,
+  email: 'user@example.com',
+  firstName: 'John',
+  lastName: 'Doe'
 });
 ```
 
-## Security Features
-
-### 1. **Token Storage**
-- **HttpOnly Cookies**: Primary storage for server-side access
-- **localStorage**: Backup for client-side access
-- **Automatic Cleanup**: Removes invalid tokens
-
-### 2. **Token Validation**
-- **Signature Verification**: Ensures token integrity
-- **Expiration Checking**: Prevents use of expired tokens
-- **Issuer/Audience Validation**: Additional security layer
-
-### 3. **Automatic Refresh**
-- **Proactive Refresh**: Refreshes tokens before expiration
-- **Retry Logic**: Handles failed requests with token refresh
-- **Graceful Degradation**: Logs out user if refresh fails
-
-### 4. **Error Handling**
-- **Network Errors**: Handles connection issues
-- **Invalid Tokens**: Clears stored data on validation failure
-- **Server Errors**: Provides meaningful error messages
-
-## Environment Configuration
-
-```env
-# JWT Configuration
-JWT_SECRET=your-secret-key-change-in-production
-
-# Development
-NODE_ENV=development
-DEBUG=false
-```
-
-## Usage Examples
-
-### 1. **Login Flow**
+**Verify Token:**
 ```typescript
-const handleLogin = async (email: string, password: string) => {
-  try {
-    const response = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    });
-    
-    if (response.ok) {
-      const { token, user } = await response.json();
-      login(token, user);
-      router.push('/main');
-    }
-  } catch (error) {
-    console.error('Login failed:', error);
-  }
-};
+const payload = await JWTService.verifyToken(token);
+console.log('User:', payload.email);
 ```
 
-### 2. **Protected API Calls**
+**Protected API Call:**
 ```typescript
-const fetchUserData = async () => {
-  try {
-    const response = await apiClient.get('/user/profile');
-    if (response.ok) {
-      const userData = await response.json();
-      setUserData(userData);
-    }
-  } catch (error) {
-    console.error('Failed to fetch user data:', error);
-  }
-};
+const response = await apiClient.get('/user/profile');
+// Token automatically included and refreshed if needed
 ```
 
-### 3. **Manual Token Refresh**
-```typescript
-const handleRefresh = async () => {
-  const success = await refreshToken();
-  if (success) {
-    console.log('Token refreshed successfully');
-  } else {
-    console.log('Token refresh failed, user logged out');
-  }
-};
-```
-
-## Best Practices
-
-### 1. **Token Management**
-- Always use the provided utilities for token operations
-- Don't manually manipulate tokens
-- Let the system handle automatic refresh
-
-### 2. **Error Handling**
-- Always handle authentication errors gracefully
-- Provide clear feedback to users
-- Log errors for debugging
-
-### 3. **Security**
-- Never expose JWT_SECRET in client-side code
-- Use HTTPS in production
-- Regularly rotate JWT secrets
-
-### 4. **Performance**
-- Tokens are automatically refreshed only when needed
-- Failed requests are retried once with fresh tokens
-- Minimal overhead for token validation
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Token Expired Errors**
-   - Check if JWT_SECRET is properly set
-   - Verify token expiration time
-   - Ensure refresh endpoint is working
-
-2. **Authentication Failures**
-   - Check browser console for errors
-   - Verify API routes are accessible
-   - Ensure middleware is properly configured
-
-3. **Refresh Loop Issues**
-   - Check network connectivity
-   - Verify refresh endpoint returns valid tokens
-   - Ensure proper error handling
-
-### Debug Mode
-
-Enable debug mode to see detailed token information:
-
-```typescript
-// Check token details
-const token = localStorage.getItem('token');
-const decoded = JWTService.decodeToken(token);
-console.log('Token payload:', decoded);
-```
-
-## Migration from Previous Implementation
-
-If you're upgrading from a previous authentication system:
-
-1. **Update Environment Variables**
-   - Ensure JWT_SECRET is set
-   - Update any old authentication configs
-
-2. **Update API Calls**
-   - Replace manual fetch calls with `apiClient`
-   - Use `authenticatedFetch` for custom requests
-
-3. **Update Components**
-   - Use the enhanced `useAuth` hook
-   - Remove manual token management code
-
-4. **Test Thoroughly**
-   - Verify login/logout flows
-   - Test token refresh scenarios
-   - Check protected route access
-
-## Future Enhancements
-
-Potential improvements for the JWT system:
-
-1. **Token Blacklisting**: Track revoked tokens
-2. **Multiple Token Types**: Access vs refresh tokens
-3. **Rate Limiting**: Prevent token abuse
-4. **Audit Logging**: Track authentication events
-5. **Device Management**: Multiple device support
+This unified approach eliminates the complexity of managing multiple JWT implementations while providing optimal performance in each runtime environment.

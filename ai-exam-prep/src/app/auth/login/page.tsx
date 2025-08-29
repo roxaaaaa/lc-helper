@@ -32,11 +32,16 @@ export default function LoginPage() {
       if (response.ok) {
         // Use the login function from AuthContext
         login(data.token, data.user);
-        router.push('/main');
+        // Add a small delay to ensure state is updated
+        setTimeout(() => {
+          router.push('/main');
+        }, 100);
       } else {
         setError(data.message || 'Login failed');
+        setIsLoading(false);
       }
     } catch (err) {
+      console.error('Login error:', err);
       setError('An error occurred. Please try again.');
     } finally {
       setIsLoading(false);

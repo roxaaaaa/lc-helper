@@ -44,7 +44,16 @@ const pool = new Pool({
 // Get database connection
 export async function getDb(): Promise<PoolClient> {
   try {
-    return await pool.connect();
+    console.log('Attempting database connection...');
+    console.log('DB_USER:', process.env.DB_USER);
+    console.log('DB_HOST:', process.env.DB_HOST);
+    console.log('DB_PORT:', process.env.DB_PORT);
+    console.log('DB_NAME:', process.env.DB_NAME);
+    console.log('DB_PASSWORD:', process.env.DB_PASSWORD ? 'Set' : 'Not set');
+    
+    const client = await pool.connect();
+    console.log('Database connection successful');
+    return client;
   } catch (error) {
     console.error('Database connection error:', error);
     console.error('DATABASE_URL:', process.env.DATABASE_URL ? 'Set' : 'Not set');
@@ -54,6 +63,7 @@ export async function getDb(): Promise<PoolClient> {
 
 // Initialize database tables
 export async function initDb() {
+  console.log('Initializing database...');
   const client = await getDb();
   try {
     // Create users table with subscription fields

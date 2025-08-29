@@ -1,7 +1,6 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { JWTService } from '../lib/jwt';
 
 interface User {
   id: number;
@@ -31,16 +30,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Function to refresh token
   const refreshToken = async (): Promise<boolean> => {
-    if (!token) return false;
+    const storedToken = localStorage.getItem('token');
+    if (!storedToken) return false;
     
     setIsRefreshing(true);
     try {
       const response = await fetch('/api/auth/refresh', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${storedToken}`,
         },
       });
 
@@ -52,7 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.setItem('user', JSON.stringify(data.user));
         return true;
       } else {
-        // Token refresh failed, logout user
+        console.log('Token refresh failed, logging out');
         logout();
         return false;
       }
@@ -65,41 +64,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Check token validity and refresh if needed
-  const checkAndRefreshToken = async (storedToken: string, storedUser: string) => {
-    try {
-      // Check if token is expired or close to expiring
-      if (JWTService.isTokenExpired(storedToken) || JWTService.shouldRefreshToken(storedToken)) {
-        // Try to refresh the token
-        const refreshSuccess = await refreshToken();
-        if (!refreshSuccess) {
-          // If refresh fails, clear stored data
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          return;
-        }
-      } else {
-        // Token is still valid, set it
-        const userData = JSON.parse(storedUser);
-        setToken(storedToken);
-        setUser(userData);
-      }
-    } catch (error) {
-      console.error('Error checking token validity:', error);
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-    }
-  };
-
   useEffect(() => {
-    // Check for existing token and user data on app load
-    const storedToken = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
+    const initializeAuth = async () => {
+      const storedToken = localStorage.getItem('token');
+      const storedUser = localStorage.getItem('user');
 
-    if (storedToken && storedUser) {
-      checkAndRefreshToken(storedToken, storedUser);
-    }
-    setIsLoading(false);
+      if (storedToken && storedUser) {
+        try {
+          // Don't verify token on client-side, just check if it exists
+          const userData = JSON.parse(storedUser);
+          setToken(storedToken);
+          setUser(userData);
+        } catch (error) {
+          console.log('Error parsing stored user data, attempting refresh...');
+          const refreshSuccess = await refreshToken();
+          if (!refreshSuccess) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+          }
+        }
+      }
+      setIsLoading(false);
+    };
+
+    initializeAuth();
   }, []);
 
   const login = (newToken: string, userData: User) => {
@@ -123,7 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     logout,
     refreshToken,
     isLoading,
-    isRefreshing,
+    isRefreshing
   };
 
   return (
@@ -133,10 +121,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// Make sure this export statement exists and is correctly named
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-} 
+}
