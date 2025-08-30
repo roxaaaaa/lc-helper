@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import { JWTService } from '../../../../lib/jwt';
-import { getDb, initDb } from '../../../../lib/database';
+import { JWTService } from '@/lib/jwt';
+import { getDb, initDb } from '@/lib/database';
 
 export async function POST(request: NextRequest) {
   try {

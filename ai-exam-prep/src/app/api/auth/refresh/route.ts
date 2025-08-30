@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { JWTServiceEdge } from '../../../../lib/jwt-edge';
-import { getDb } from '../../../../lib/database';
+import { JWTServiceEdge } from '@/lib/jwt-edge';
+import { getDb } from '@/lib/database';
 
 export async function POST(request: NextRequest) {
   try {

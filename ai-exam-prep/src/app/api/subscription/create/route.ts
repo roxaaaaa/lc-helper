@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { JWTService } from '../../../../lib/jwt';
-import { getDb } from '../../../../lib/database';
+import { JWTService } from '@/lib/jwt';
+import { getDb } from '@/lib/database';
 
 export async function POST(request: NextRequest) {
   try {

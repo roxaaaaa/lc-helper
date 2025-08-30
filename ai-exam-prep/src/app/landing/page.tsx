@@ -23,6 +23,9 @@ export default function LandingPage() {
                 <Link href="/pricing" className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
                   Pricing
                 </Link>
+                <Link href="/contact" className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
+                  Contact
+                </Link>
                 <Link href="/auth/login" className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
                   Sign In
                 </Link>
@@ -51,6 +54,9 @@ export default function LandingPage() {
               </Link>
               <Link href="/pricing" className="text-gray-700 hover:text-indigo-600 block px-3 py-2 rounded-md text-base font-medium">
                 Pricing
+              </Link>
+              <Link href="/contact" className="text-gray-700 hover:text-indigo-600 block px-3 py-2 rounded-md text-base font-medium">
+                Contact
               </Link>
               <Link href="/auth/login" className="text-gray-700 hover:text-indigo-600 block px-3 py-2 rounded-md text-base font-medium">
                 Sign In
@@ -233,7 +239,7 @@ export default function LandingPage() {
                       </Link>
                     </li>
                     <li>
-                      <Link href="/main" className="text-base text-gray-300 hover:text-white">
+                      <Link href="/contact" className="text-base text-gray-300 hover:text-white">
                         Contact Us
                       </Link>
                     </li>
