@@ -38,7 +38,7 @@ export default function PricingPage() {
             </h1>
             <p className="max-w-2xl mx-auto text-xl text-gray-600 mt-4">
               Join thousands of students who've improved their exam scores with AI-powered practice. 
-              <span className="font-semibold text-indigo-600"> No contracts. Cancel anytime.</span>
+            <span className="font-semibold text-indigo-600"> No contracts. Cancel anytime.</span>
             </p>
             <div className="mt-6 flex justify-center">
               <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-2">
