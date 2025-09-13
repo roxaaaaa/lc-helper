@@ -1,4 +1,3 @@
-import jwt from 'jsonwebtoken';
 import { jwtVerify, SignJWT } from 'jose';
 
 // Secure secret handling
@@ -16,9 +15,7 @@ const getJwtSecret = (): string => {
 
 const JWT_SECRET = getJwtSecret();
 
-// Improved Edge Runtime detection
-const isEdgeRuntime = process.env.NEXT_RUNTIME === 'edge' ||
-                     (typeof globalThis !== 'undefined' && 'EdgeRuntime' in globalThis);
+// Note: Using jose library for both Edge and Node runtimes for consistency
 
 export interface JWTPayload {
   userId: number;
@@ -53,20 +50,15 @@ export class JWTService {
       lastName: String(payload.lastName)
     };
 
-    if (isEdgeRuntime) {
-      const secret = new TextEncoder().encode(JWT_SECRET);
-      const alg = 'HS256';
-      
-      return new SignJWT(standardizedPayload)
-        .setProtectedHeader({ alg })
-        .setIssuedAt()
-        .setExpirationTime('7d')
-        .sign(secret);
-    } else {
-      return jwt.sign(standardizedPayload, JWT_SECRET, {
-        expiresIn: '7d'
-      });
-    }
+    // Always use jose for consistency between Edge and Node runtimes
+    const secret = new TextEncoder().encode(JWT_SECRET);
+    const alg = 'HS256';
+    
+    return new SignJWT(standardizedPayload)
+      .setProtectedHeader({ alg })
+      .setIssuedAt()
+      .setExpirationTime('7d')
+      .sign(secret);
   }
 
   /**
@@ -78,15 +70,9 @@ export class JWTService {
         throw new Error('JWT_SECRET is not configured');
       }
 
-      let payload: any;
-
-      if (isEdgeRuntime) {
-        const secret = new TextEncoder().encode(JWT_SECRET);
-        const { payload: josePayload } = await jwtVerify(token, secret);
-        payload = josePayload;
-      } else {
-        payload = jwt.verify(token, JWT_SECRET);
-      }
+      // Always use jose for consistency between Edge and Node runtimes
+      const secret = new TextEncoder().encode(JWT_SECRET);
+      const { payload } = await jwtVerify(token, secret);
 
       // Validate payload structure
       if (!isJWTPayload(payload)) {
