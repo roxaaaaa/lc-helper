@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "buildCommand": "cd ai-exam-prep && npm run build",
+  "outputDirectory": "ai-exam-prep/.next",
+  "installCommand": "cd ai-exam-prep && npm install",
+  "framework": "nextjs",
+  "functions": {
+    "ai-exam-prep/src/app/api/**/*.ts": {
+      "maxDuration": 30
+    }
+  },
+  "env": {
+    "NODE_ENV": "production"
+  }
+}
