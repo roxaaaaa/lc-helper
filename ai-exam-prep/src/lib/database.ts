@@ -1,45 +1,42 @@
 import { Pool, PoolClient } from 'pg';
 
-// Helper function to properly format connection string
-function getConnectionString(): string {
-  const connectionString = process.env.DATABASE_URL;
-  if (!connectionString) {
-    throw new Error('DATABASE_URL environment variable is not set');
+
+// Database connection configuration
+const getDbConfig = () => {
+  // In production (Vercel), use DATABASE_URL if available
+  if (process.env.DATABASE_URL) {
+    return {
+      connectionString: process.env.DATABASE_URL,
+      ssl: { rejectUnauthorized: false },
+      connectionTimeoutMillis: 10000,
+      idleTimeoutMillis: 30000,
+      max: 10, // Reduced for serverless
+    };
   }
+
+  // Fallback to individual parameters
+  const requiredEnvVars = ['DB_USER', 'DB_PASSWORD', 'DB_HOST', 'DB_NAME'];
+  const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
   
-  // If the connection string already contains encoded characters, use it as is
-  if (connectionString.includes('%')) {
-    return connectionString;
+  if (missingVars.length > 0) {
+    throw new Error(`Missing required environment variables: ${missingVars.join(', ')}`);
   }
-  
-  // Otherwise, try to parse and re-encode it properly
-  try {
-    const url = new URL(connectionString);
-    // Re-encode the password if it contains special characters
-    if (url.password) {
-      url.password = encodeURIComponent(url.password);
-    }
-    return url.toString();
-  } catch (error) {
-    // If URL parsing fails, return the original string
-    return connectionString;
-  }
-}
+
+  return {
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    host: process.env.DB_HOST,
+    port: parseInt(process.env.DB_PORT || '5432'),
+    database: process.env.DB_NAME,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    connectionTimeoutMillis: 10000,
+    idleTimeoutMillis: 30000,
+    max: 10, // Reduced for serverless
+  };
+};
 
 // Database connection pool
-const pool = new Pool({
-  // Use individual parameters if connection string fails
-  user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || 'Roksa10,,',
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '5432'),
-  database: process.env.DB_NAME || 'project_test',
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  // Add connection timeout and retry settings
-  connectionTimeoutMillis: 10000,
-  idleTimeoutMillis: 30000,
-  max: 20,
-});
+const pool = new Pool(getDbConfig());
 
 // Get database connection
 export async function getDb(): Promise<PoolClient> {
@@ -54,10 +51,10 @@ export async function getDb(): Promise<PoolClient> {
     const client = await pool.connect();
     console.log('Database connection successful');
     return client;
-  } catch (error) {
-    console.error('Database connection error:', error);
+  } catch (err) {
+    console.error('Database connection error:', err);
     console.error('DATABASE_URL:', process.env.DATABASE_URL ? 'Set' : 'Not set');
-    throw error;
+    throw err;
   }
 }
 

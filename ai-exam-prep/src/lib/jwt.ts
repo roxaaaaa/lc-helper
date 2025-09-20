@@ -27,13 +27,18 @@ export interface JWTPayload {
 }
 
 // Type guard for payload validation
-function isJWTPayload(payload: any): payload is JWTPayload {
+function isJWTPayload(payload: unknown): payload is JWTPayload {
   return (
-    payload &&
-    (typeof payload.userId === 'number' || typeof payload.userId === 'string') &&
-    typeof payload.email === 'string' &&
-    typeof payload.firstName === 'string' &&
-    typeof payload.lastName === 'string'
+    typeof payload === 'object' &&
+    payload !== null &&
+    ('userId' in payload) &&
+    ('email' in payload) &&
+    ('firstName' in payload) &&
+    ('lastName' in payload) &&
+    (typeof (payload as any).userId === 'number' || typeof (payload as any).userId === 'string') &&
+    typeof (payload as any).email === 'string' &&
+    typeof (payload as any).firstName === 'string' &&
+    typeof (payload as any).lastName === 'string'
   );
 }
 
@@ -95,6 +100,37 @@ export class JWTService {
         throw error;
       }
       throw new Error('Invalid or expired token');
+    }
+  }
+
+  /**
+   * Check if a token should be refreshed based on its expiration time
+   * Returns true if the token expires within the next 30 minutes
+   */
+  static shouldRefreshToken(token: string): boolean {
+    try {
+      // Decode the token without verification to check expiration
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        return true; // Invalid token format, should refresh
+      }
+
+      const payload = JSON.parse(atob(parts[1]));
+      const exp = payload.exp;
+      
+      if (!exp) {
+        return true; // No expiration, should refresh
+      }
+
+      const now = Math.floor(Date.now() / 1000);
+      const timeUntilExpiry = exp - now;
+      const thirtyMinutes = 30 * 60; // 30 minutes in seconds
+
+      // Refresh if token expires within 30 minutes
+      return timeUntilExpiry <= thirtyMinutes;
+    } catch (error) {
+      console.error('Error checking token refresh:', error);
+      return true; // If we can't parse the token, assume it needs refresh
     }
   }
 

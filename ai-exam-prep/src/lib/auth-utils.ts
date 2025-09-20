@@ -5,9 +5,24 @@ interface AuthenticatedRequestOptions extends RequestInit {
   requireAuth?: boolean;
 }
 
+interface User {
+  id: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+  school: string;
+  year: string;
+  trialStartDate?: string;
+  trialEndDate?: string;
+  subscriptionStatus?: string;
+  subscriptionType?: string;
+  subscriptionEndDate?: string;
+  createdAt: string;
+}
+
 interface RefreshResponse {
   token: string;
-  user: any;
+  user: User;
 }
 
 /**
@@ -24,7 +39,7 @@ const localStorageUtils = {
     }
   },
   
-  setUser(user: any): void {
+  setUser(user: User): void {
     if (typeof window !== 'undefined') {
       localStorage.setItem('user', JSON.stringify(user));
     }
@@ -163,7 +178,7 @@ export class AuthenticatedAPIClient {
     });
   }
 
-  async post(endpoint: string, data: any, options: AuthenticatedRequestOptions = {}) {
+  async post(endpoint: string, data: unknown, options: AuthenticatedRequestOptions = {}) {
     return authenticatedFetch(`${this.baseURL}${endpoint}`, {
       method: 'POST',
       headers: {
@@ -175,7 +190,7 @@ export class AuthenticatedAPIClient {
     });
   }
 
-  async put(endpoint: string, data: any, options: AuthenticatedRequestOptions = {}) {
+  async put(endpoint: string, data: unknown, options: AuthenticatedRequestOptions = {}) {
     return authenticatedFetch(`${this.baseURL}${endpoint}`, {
       method: 'PUT',
       headers: {
