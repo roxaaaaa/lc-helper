@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { JWTServiceEdge } from '@/lib/jwt-edge';
+import { JWTService } from '@/lib/jwt';
 import { getDb } from '@/lib/database';
 
 export async function POST(request: NextRequest) {
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify the current token
-    const payload = await JWTServiceEdge.verifyToken(token);
+    const payload = await JWTService.verifyToken(token);
     
     // Get fresh user data from database
     const client = await getDb();
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate new token
-    const newToken = await JWTServiceEdge.generateToken({
+    const newToken = await JWTService.generateToken({
       userId: user.id,
       email: user.email,
       firstName: user.firstName,
