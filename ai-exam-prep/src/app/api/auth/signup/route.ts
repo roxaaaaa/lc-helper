@@ -3,6 +3,8 @@ import bcrypt from 'bcryptjs';
 import { JWTService } from '@/lib/jwt';
 import { getDb, initDb } from '@/lib/database';
 
+export const runtime = 'nodejs';
+
 export async function POST(request: NextRequest) {
   try {
     const { firstName, lastName, email, password, school, year } = await request.json();

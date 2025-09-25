@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { JWTService } from '@/lib/jwt';
 import { getDb } from '@/lib/database';
 
+export const runtime = 'nodejs';
+
 export async function DELETE(request: NextRequest) {
   try {
     // Get token from cookies or headers
