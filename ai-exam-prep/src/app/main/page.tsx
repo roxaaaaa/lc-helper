@@ -39,7 +39,7 @@ export default function MainPage() {
     setLoading(true);
     setQuestions(null);
     try {
-      const response = await fetch('/api/ai/generate-questions', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000'}/api/ai/generate_questions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
@@ -100,7 +100,10 @@ export default function MainPage() {
         <button
           onClick={handleLogout}
           className="px-4 py-2 rounded bg-red-600 text-white font-semibold hover:bg-red-700 transition"
+          type="button"
         >
+          Logout
+        </button>
           Logout
         </button>
         <button
