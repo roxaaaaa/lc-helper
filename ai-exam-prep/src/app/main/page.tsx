@@ -104,8 +104,6 @@ export default function MainPage() {
         >
           Logout
         </button>
-          Logout
-        </button>
         <button
           aria-label="Toggle dark mode"
           className="p-2 rounded-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-black shadow hover:scale-105 transition"
