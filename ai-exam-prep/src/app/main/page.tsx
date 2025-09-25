@@ -39,7 +39,7 @@ export default function MainPage() {
     setLoading(true);
     setQuestions(null);
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/ai/generate_questions", {
+      const response = await fetch('/api/ai/generate-questions', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 

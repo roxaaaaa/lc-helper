@@ -7,7 +7,7 @@ const getDbConfig = () => {
   if (process.env.DATABASE_URL) {
     return {
       connectionString: process.env.DATABASE_URL,
-      ssl: { rejectUnauthorized: false },
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
       connectionTimeoutMillis: 10000,
       idleTimeoutMillis: 30000,
       max: 10, // Reduced for serverless
@@ -42,6 +42,8 @@ const pool = new Pool(getDbConfig());
 export async function getDb(): Promise<PoolClient> {
   try {
     console.log('Attempting database connection...');
+    console.log('NODE_ENV:', process.env.NODE_ENV);
+    console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'Set' : 'Not set');
     console.log('DB_USER:', process.env.DB_USER);
     console.log('DB_HOST:', process.env.DB_HOST);
     console.log('DB_PORT:', process.env.DB_PORT);
@@ -53,7 +55,12 @@ export async function getDb(): Promise<PoolClient> {
     return client;
   } catch (err) {
     console.error('Database connection error:', err);
-    console.error('DATABASE_URL:', process.env.DATABASE_URL ? 'Set' : 'Not set');
+    console.error('Error details:', {
+      message: err instanceof Error ? err.message : 'Unknown error',
+      code: (err as any)?.code,
+      detail: (err as any)?.detail,
+      hint: (err as any)?.hint
+    });
     throw err;
   }
 }
